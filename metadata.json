@@ -1,0 +1,6 @@
+{
+  "name": "LinkPulse AI - Autonomous SEO Backlink Agent & CRM",
+  "description": "Autonomous AI Agent CRM for human-paced high DA/PA backlink acquisition, multi-account management, WordPress REST API syndication, and real-time link tracking.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

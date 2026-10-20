@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script>
+      // Fix for "Cannot set property fetch of #<Window> which has only a getter"
+      // Ensures window.fetch has both getter and setter in iframe sandboxes
+      (function() {
+        try {
+          var _currentFetch = window.fetch;
+          Object.defineProperty(window, 'fetch', {
+            configurable: true,
+            enumerable: true,
+            get: function() {
+              return _currentFetch;
+            },
+            set: function(val) {
+              _currentFetch = val;
+            }
+          });
+        } catch (e) {
+          try {
+            Object.defineProperty(Window.prototype, 'fetch', {
+              configurable: true,
+              enumerable: true,
+              get: function() {
+                return _currentFetch;
+              },
+              set: function(val) {
+                _currentFetch = val;
+              }
+            });
+          } catch (err) {}
+        }
+
+        // Global safety error suppressor for benign window.fetch getter errors
+        window.addEventListener('error', function(event) {
+          if (event && event.message && event.message.indexOf('fetch') !== -1 && event.message.indexOf('getter') !== -1) {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            return true;
+          }
+        }, true);
+      })();
+    </script>
+    <title>LinkPulse AI - Autonomous SEO Backlink Agent & CRM</title>
+    <meta name="description" content="Autonomous AI Agent CRM for human-paced high DA/PA backlink acquisition, multi-account management, WordPress REST API syndication, and real-time link tracking." />
+    <meta property="og:title" content="LinkPulse AI - Autonomous SEO Backlink Agent & CRM" />
+    <meta property="og:description" content="Autonomous AI Agent CRM for human-paced high DA/PA backlink acquisition, multi-account management, WordPress REST API syndication, and real-time link tracking." />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  </head>
+  <body class="bg-slate-950 text-slate-100 antialiased font-sans selection:bg-indigo-500/30 selection:text-indigo-200">
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+
