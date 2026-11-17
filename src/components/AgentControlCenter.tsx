@@ -10,7 +10,8 @@ import {
   Sparkles, 
   RefreshCw,
   Info,
-  TrendingUp
+  TrendingUp,
+  Zap
 } from 'lucide-react';
 import { UserAccount, AgentSchedule } from '../types';
 import { Language, translations } from '../utils/translations';
@@ -18,12 +19,14 @@ import { Language, translations } from '../utils/translations';
 interface AgentControlCenterProps {
   account: UserAccount;
   onUpdateSchedule: (schedule: Partial<AgentSchedule>) => void;
+  onFastBatchGenerate?: (count: number) => void;
   language: Language;
 }
 
 export const AgentControlCenter: React.FC<AgentControlCenterProps> = ({
   account,
   onUpdateSchedule,
+  onFastBatchGenerate,
   language
 }) => {
   const t = translations[language];
@@ -75,8 +78,8 @@ export const AgentControlCenter: React.FC<AgentControlCenterProps> = ({
           </div>
         </div>
 
-        {/* Pacing Speed Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+        {/* Pacing Speed Cards: 4 Modes including Turbo */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
           
           {/* Conservative Mode */}
           <div
@@ -89,7 +92,7 @@ export const AgentControlCenter: React.FC<AgentControlCenterProps> = ({
           >
             <div className="flex items-center justify-between mb-2">
               <span className="text-xs font-bold text-white">
-                {language === 'hi' ? '1. कंजर्वेटिव (अति-सुरक्षित)' : '1. Conservative (Ultra Safe)'}
+                {language === 'hi' ? '1. कंजर्वेटिव (अति-सुरक्षित)' : '1. Conservative (Safe)'}
               </span>
               <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 font-medium">
                 1 link / 48h
@@ -97,8 +100,8 @@ export const AgentControlCenter: React.FC<AgentControlCenterProps> = ({
             </div>
             <p className="text-xs text-slate-400">
               {language === 'hi' 
-                ? 'बिल्कुल नई वेबसाइट्स (0-3 महीने पुरानी) के लिए सर्वश्रेष्ठ। पेनल्टी का 0% जोखिम।' 
-                : 'Best for brand new domains (0-3 months old). 0% risk of search engine algorithmic scrutiny.'}
+                ? 'बिल्कुल नई वेबसाइट्स के लिए। 0% पेनल्टी जोखिम।' 
+                : 'Best for brand new domains. 0% risk.'}
             </p>
           </div>
 
@@ -116,7 +119,7 @@ export const AgentControlCenter: React.FC<AgentControlCenterProps> = ({
             </div>
             <div className="flex items-center justify-between mb-2">
               <span className="text-xs font-bold text-white">
-                {language === 'hi' ? '2. नेचुरल ह्यूमन (इंसान की तरह)' : '2. Natural Human Rhythm'}
+                {language === 'hi' ? '2. नेचुरल ह्यूमन' : '2. Natural Human'}
               </span>
               <span className="text-[10px] px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 font-medium">
                 1-2 links / 24h
@@ -124,8 +127,8 @@ export const AgentControlCenter: React.FC<AgentControlCenterProps> = ({
             </div>
             <p className="text-xs text-slate-400">
               {language === 'hi' 
-                ? 'रैंडम घंटों में दिन के समय बैकलिंक बनाता है। वास्तविक SEO लेखक की तरह स्थिर ऑर्गेनिक विकास।' 
-                : 'Organic timing with natural hour jitter. Mimics active tech writers contributing contextual posts.'}
+                ? 'स्थिर ऑर्गेनिक विकास, दिन के समय रैंडम घंटों में।' 
+                : 'Organic human editorial pacing across daylight hours.'}
             </p>
           </div>
 
@@ -140,7 +143,7 @@ export const AgentControlCenter: React.FC<AgentControlCenterProps> = ({
           >
             <div className="flex items-center justify-between mb-2">
               <span className="text-xs font-bold text-white">
-                {language === 'hi' ? '3. त्वरित विकास (Accelerated)' : '3. Accelerated Growth'}
+                {language === 'hi' ? '3. त्वरित विकास (Fast)' : '3. Accelerated'}
               </span>
               <span className="text-[10px] px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-400 font-medium">
                 2-4 links / 24h
@@ -148,12 +151,72 @@ export const AgentControlCenter: React.FC<AgentControlCenterProps> = ({
             </div>
             <p className="text-xs text-slate-400">
               {language === 'hi' 
-                ? 'स्थापित वेबसाइट्स (DA 30+) के लिए जहां तेजी से अथॉरिटी स्केल करना हो।' 
-                : 'Designed for established domains (DA 30+) ready for rapid topical authority expansion.'}
+                ? 'तेजी से अथॉरिटी बढ़ाने के लिए त्वरित गति।' 
+                : 'Rapid topical authority expansion schedule.'}
+            </p>
+          </div>
+
+          {/* Turbo 10x-50x Super-Fast Mode */}
+          <div
+            onClick={() => onUpdateSchedule({ dripPacing: 'turbo', minDelayHours: 1, maxDelayHours: 2, dailyCap: 50 })}
+            className={`p-4 rounded-xl border cursor-pointer transition relative ${
+              agentSchedule.dripPacing === 'turbo'
+                ? 'bg-amber-950/40 border-amber-500 shadow-md shadow-amber-500/10 ring-1 ring-amber-500/40'
+                : 'bg-slate-950/40 border-slate-800/80 hover:border-slate-700'
+            }`}
+          >
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs font-bold text-white flex items-center space-x-1">
+                <Zap className="w-3.5 h-3.5 text-amber-400 fill-current" />
+                <span>{language === 'hi' ? '4. टर्बो सुपर-फास्ट' : '4. Turbo Velocity'}</span>
+              </span>
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 font-extrabold">
+                10-50 links / 24h
+              </span>
+            </div>
+            <p className="text-xs text-slate-400">
+              {language === 'hi'
+                ? 'सुपर-फास्ट बैकलिंक। बड़े डेटाबेस से तुरंत हाई-ट्रैफिक वेबसाइट्स पर लिंक्स बनाता है।'
+                : 'Instant high-velocity acquisition on top publishers.'}
             </p>
           </div>
 
         </div>
+
+        {/* 1-Click Fast Multi-Backlink Generator Bar */}
+        {onFastBatchGenerate && (
+          <div className="mt-5 p-4 bg-gradient-to-r from-amber-950/40 via-indigo-950/30 to-slate-950 border border-amber-500/30 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0">
+                <Zap className="w-5 h-5 fill-current" />
+              </div>
+              <div>
+                <h4 className="text-xs font-extrabold text-white uppercase tracking-wider flex items-center space-x-1.5">
+                  <span>{language === 'hi' ? '⚡ 1-क्लिक फास्ट मल्टी-बैकलिंक जनरेटर (Instant Turbo Blast)' : '⚡ 1-Click Fast Multi-Backlink Generator'}</span>
+                </h4>
+                <p className="text-[11px] text-slate-300 mt-0.5">
+                  {language === 'hi'
+                    ? 'हाई-ट्रैफिक वेबसाइट्स (Healthline, WebMD, Reddit, Men\'s Health) पर एक साथ तुरंत बैकलिंक्स बनाएं।'
+                    : 'Immediately generate multiple contextual backlinks on ultra-high authority fitness domains in parallel.'}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2 shrink-0">
+              {[5, 10, 25, 50].map((count) => (
+                <button
+                  key={count}
+                  type="button"
+                  onClick={() => onFastBatchGenerate(count)}
+                  className="px-3.5 py-1.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black text-xs rounded-xl transition shadow flex items-center space-x-1 active:scale-95"
+                >
+                  <Zap className="w-3 h-3 fill-current" />
+                  <span>{count} {language === 'hi' ? 'फास्ट लिंक्स' : 'Links'}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Daily Target Volume & Google Safe Pacing */}
         <div className="mt-5 p-4 bg-slate-950/70 border border-slate-800 rounded-2xl space-y-3">

@@ -12,7 +12,9 @@ import {
   Eye, 
   Shield, 
   Sparkles,
-  HelpCircle
+  HelpCircle,
+  FileSpreadsheet,
+  Zap
 } from 'lucide-react';
 import { Backlink, WordPressSite } from '../types';
 import { aiAgentEngine } from '../services/aiAgentEngine';
@@ -26,6 +28,8 @@ interface BacklinksTableProps {
   onRetryBacklink: (backlink: Backlink) => void;
   onViewSnippet: (backlink: Backlink) => void;
   onOpenAuditReport?: () => void;
+  onOpenGoogleSheets?: () => void;
+  onFastBatchGenerate?: (count: number) => void;
   language: Language;
 }
 
@@ -37,11 +41,14 @@ export const BacklinksTable: React.FC<BacklinksTableProps> = ({
   onRetryBacklink,
   onViewSnippet,
   onOpenAuditReport,
+  onOpenGoogleSheets,
+  onFastBatchGenerate,
   language
 }) => {
   const t = translations[language];
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'live' | 'pending_verification' | 'failed'>('all');
+  const [personaFilter, setPersonaFilter] = useState<string>('all');
   const [verifyingId, setVerifyingId] = useState<string | null>(null);
 
   // Apply filters
@@ -52,13 +59,17 @@ export const BacklinksTable: React.FC<BacklinksTableProps> = ({
     // Status filter
     if (statusFilter !== 'all' && b.status !== statusFilter) return false;
 
+    // Persona filter
+    if (personaFilter !== 'all' && b.humanPersona?.name !== personaFilter) return false;
+
     // Search filter
     if (searchTerm.trim()) {
       const q = searchTerm.toLowerCase();
       const matchDomain = b.targetDomain.toLowerCase().includes(q);
       const matchAnchor = b.anchorText.toLowerCase().includes(q);
       const matchDest = b.destinationUrl.toLowerCase().includes(q);
-      if (!matchDomain && !matchAnchor && !matchDest) return false;
+      const matchPersona = b.humanPersona?.name.toLowerCase().includes(q);
+      if (!matchDomain && !matchAnchor && !matchDest && !matchPersona) return false;
     }
 
     return true;
@@ -142,6 +153,33 @@ export const BacklinksTable: React.FC<BacklinksTableProps> = ({
             <option value="failed">🔴 {t.statusFailed}</option>
           </select>
 
+          {/* Persona Filter */}
+          <select
+            value={personaFilter}
+            onChange={(e) => setPersonaFilter(e.target.value)}
+            className="bg-slate-950 text-xs text-slate-200 border border-slate-800 rounded-xl px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+          >
+            <option value="all">{language === 'hi' ? 'सभी शोधकर्ता (All Personas)' : 'All Human Personas'}</option>
+            <option value="Dr. Marcus Vance, CSCS">Dr. Marcus Vance, CSCS</option>
+            <option value="Sarah Lin, MS">Sarah Lin, MS</option>
+            <option value="Julian Cole, RD, CSSD">Julian Cole, RD, CSSD</option>
+            <option value="Dr. Elena Rostova, DPT">Dr. Elena Rostova, DPT</option>
+            <option value="David Thorne">David Thorne</option>
+            <option value="Priya Sharma">Priya Sharma</option>
+          </select>
+
+          {/* Fast Batch Button */}
+          {onFastBatchGenerate && (
+            <button
+              onClick={() => onFastBatchGenerate(10)}
+              className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-black text-slate-950 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 shadow-md shadow-amber-500/20 transition active:scale-95"
+              title="Immediately generate 10 verified backlinks across multiple human personas"
+            >
+              <Zap className="w-3.5 h-3.5 fill-current" />
+              <span>{language === 'hi' ? '⚡ +10 फास्ट लिंक्स' : '⚡ +10 Fast Links'}</span>
+            </button>
+          )}
+
           {/* Fetch Live Audit Report Button */}
           {onOpenAuditReport && (
             <button
@@ -150,6 +188,18 @@ export const BacklinksTable: React.FC<BacklinksTableProps> = ({
             >
               <FileText className="w-3.5 h-3.5" />
               <span>{language === 'hi' ? 'लाइव ऑडिट रिपोर्ट फेच करें' : 'Fetch Audit Report'}</span>
+            </button>
+          )}
+
+          {/* Export to Google Sheets Button */}
+          {onOpenGoogleSheets && (
+            <button
+              onClick={onOpenGoogleSheets}
+              className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-emerald-300 bg-emerald-950/60 hover:bg-emerald-900/70 border border-emerald-500/40 shadow-sm transition"
+              title="Sync & Export to Google Sheets"
+            >
+              <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-400" />
+              <span>{language === 'hi' ? 'गूगल शीट्स में भेजें' : 'Google Sheets'}</span>
             </button>
           )}
 
@@ -171,7 +221,7 @@ export const BacklinksTable: React.FC<BacklinksTableProps> = ({
             <tr>
               <th className="py-3 px-4">{language === 'hi' ? 'टारगेट प्लेटफॉर्म / DA' : 'Target Platform & DA'}</th>
               <th className="py-3 px-4">{language === 'hi' ? 'एंकर टेक्स्ट' : 'Anchor Text & Type'}</th>
-              <th className="py-3 px-4">{language === 'hi' ? 'वर्डप्रेस गंतव्य URL' : 'Target Site / Destination'}</th>
+              <th className="py-3 px-4">{language === 'hi' ? 'गंतव्य URL व शोधकर्ता' : 'Destination & Human Author'}</th>
               <th className="py-3 px-4">{language === 'hi' ? 'मासिक ट्रैफिक' : 'Est. Traffic'}</th>
               <th className="py-3 px-4">{language === 'hi' ? 'स्थिति' : 'Live Status'}</th>
               <th className="py-3 px-4">{language === 'hi' ? 'इंडेक्सिंग' : 'Indexing'}</th>
@@ -203,6 +253,11 @@ export const BacklinksTable: React.FC<BacklinksTableProps> = ({
                       <div>
                         <div className="flex items-center space-x-1.5">
                           <span className="font-semibold text-white">{item.targetDomain}</span>
+                          {item.isNewlyDiscovered && (
+                            <span className="px-1.5 py-0.2 rounded text-[9px] font-black bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 uppercase">
+                              Researched Today
+                            </span>
+                          )}
                           <a
                             href={liveTargetUrl}
                             target="_blank"
@@ -240,15 +295,21 @@ export const BacklinksTable: React.FC<BacklinksTableProps> = ({
                     </div>
                   </td>
 
-                  {/* Connected WordPress Site */}
+                  {/* Connected WordPress Site & Human Persona */}
                   <td className="py-3.5 px-4">
-                    <div className="max-w-[180px]">
+                    <div className="max-w-[210px]">
                       <span className="text-white text-xs block font-semibold truncate">
-                        {site?.name || 'WordPress Site'}
+                        {site?.name || 'fitnesstoday.us'}
                       </span>
-                      <span className="text-[11px] text-slate-400 truncate block" title={item.destinationUrl}>
+                      <span className="text-[11px] text-slate-400 truncate block font-mono" title={item.destinationUrl}>
                         {item.destinationUrl.replace(/^https?:\/\//, '')}
                       </span>
+                      {item.humanPersona && (
+                        <div className="mt-1 flex items-center space-x-1.5 text-[10px] text-indigo-300">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0 inline-block" />
+                          <span className="truncate font-semibold">👤 {item.humanPersona.name}</span>
+                        </div>
+                      )}
                     </div>
                   </td>
 

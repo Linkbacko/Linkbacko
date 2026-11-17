@@ -8,7 +8,8 @@ import {
   Sparkles, 
   Languages, 
   ShieldCheck,
-  CheckCircle2
+  CheckCircle2,
+  FileSpreadsheet
 } from 'lucide-react';
 import { UserAccount, WordPressSite } from '../types';
 import { Language, translations } from '../utils/translations';
@@ -25,6 +26,7 @@ interface NavbarProps {
   language: Language;
   onToggleLanguage: () => void;
   onOpenTargetsModal: () => void;
+  onOpenGoogleSheetsModal?: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -37,7 +39,8 @@ export const Navbar: React.FC<NavbarProps> = ({
   isTriggering,
   language,
   onToggleLanguage,
-  onOpenTargetsModal
+  onOpenTargetsModal,
+  onOpenGoogleSheetsModal
 }) => {
   const t = translations[language];
 
@@ -111,6 +114,18 @@ export const Navbar: React.FC<NavbarProps> = ({
           {/* Right Action Buttons & User Menu */}
           <div className="flex items-center space-x-2 sm:space-x-3">
             
+            {/* Google Sheets Workspace Integration CTA */}
+            {onOpenGoogleSheetsModal && (
+              <button
+                onClick={onOpenGoogleSheetsModal}
+                className="hidden sm:inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-emerald-300 bg-emerald-950/50 hover:bg-emerald-900/60 border border-emerald-500/30 transition shadow-sm"
+                title="Export & Sync Backlinks with Google Sheets"
+              >
+                <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-400" />
+                <span>Google Sheets</span>
+              </button>
+            )}
+
             {/* High DA Targets Directory CTA */}
             <button
               onClick={onOpenTargetsModal}

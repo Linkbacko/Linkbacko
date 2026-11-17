@@ -41,6 +41,7 @@ import { CampaignWorkflowView } from './components/CampaignWorkflowView';
 import { LinkRiskAuditor } from './components/LinkRiskAuditor';
 import { AuthorityGraphVisualizer } from './components/AuthorityGraphVisualizer';
 import { AuthorityOpportunityCalculator } from './components/AuthorityOpportunityCalculator';
+import { GoogleSheetsModal } from './components/GoogleSheetsModal';
 import { Language, translations } from './utils/translations';
 
 export default function App() {
@@ -79,6 +80,7 @@ export default function App() {
   const [isWordPressModalOpen, setIsWordPressModalOpen] = useState(false);
   const [isTargetsModalOpen, setIsTargetsModalOpen] = useState(false);
   const [isCampaignModalOpen, setIsCampaignModalOpen] = useState(false);
+  const [isGoogleSheetsModalOpen, setIsGoogleSheetsModalOpen] = useState(false);
   const [previewBacklink, setPreviewBacklink] = useState<Backlink | null>(null);
   const [isRealtimeModalOpen, setIsRealtimeModalOpen] = useState(false);
   const [isAuditReportOpen, setIsAuditReportOpen] = useState(false);
@@ -331,6 +333,43 @@ export default function App() {
     handleTriggerAgent();
   };
 
+  const handleFastBatchGenerate = async (count: number = 5) => {
+    if (!activeAccount) return;
+    setIsTriggering(true);
+
+    try {
+      const siteId = selectedSite?.id || activeAccount.sites[0]?.id;
+      const result = await aiAgentEngine.buildBatchLinksAction(activeAccount, count, {
+        targetSiteId: siteId,
+        targetKeyword: 'muscle recovery daily workout routines hypertrophy guide'
+      });
+
+      result.backlinks.forEach(bl => {
+        storageService.addBacklink(activeAccount.id, bl);
+      });
+
+      result.logs.forEach(log => {
+        storageService.addLog(activeAccount.id, log);
+      });
+
+      const updated = storageService.getActiveAccount();
+      setActiveAccount(updated);
+
+      const totalGainTraffic = result.backlinks.reduce((acc, b) => acc + (b.trafficEst || 0), 0);
+
+      showToast(
+        language === 'hi'
+          ? `सफलता! ${result.backlinks.length} नए हाई-अथॉरिटी बैकलिंक्स तुरंत बन गए (+${totalGainTraffic.toLocaleString()} मासिक पाठक ट्रैफिक)!`
+          : `Success! Generated ${result.backlinks.length} high-authority backlinks (+${totalGainTraffic.toLocaleString()}/mo traffic)!`,
+        'success'
+      );
+    } catch (err: any) {
+      showToast(err.message || 'Error executing fast link generation', 'error');
+    } finally {
+      setIsTriggering(false);
+    }
+  };
+
   const handleTriggerAgentForKeyword = async (siteId: string, keyword: string, preferredTargetId?: string) => {
     if (!activeAccount) return;
     setIsTriggering(true);
@@ -529,6 +568,7 @@ export default function App() {
         language={language}
         onToggleLanguage={() => setLanguage(l => l === 'en' ? 'hi' : 'en')}
         onOpenTargetsModal={() => setIsTargetsModalOpen(true)}
+        onOpenGoogleSheetsModal={() => setIsGoogleSheetsModalOpen(true)}
       />
 
       {/* Navigation Sub-header Tabs */}
@@ -689,6 +729,8 @@ export default function App() {
             onOpenAuditReport={() => setIsAuditReportOpen(true)}
             onOpenCampaignModal={() => setIsCampaignModalOpen(true)}
             onInspectBacklink={(b) => setPreviewBacklink(b)}
+            onOpenGoogleSheets={() => setIsGoogleSheetsModalOpen(true)}
+            onFastBatchGenerate={handleFastBatchGenerate}
             language={language}
           />
         )}
@@ -735,6 +777,8 @@ export default function App() {
             onRetryBacklink={handleRetryBacklink}
             onViewSnippet={(b) => setPreviewBacklink(b)}
             onOpenAuditReport={() => setIsAuditReportOpen(true)}
+            onOpenGoogleSheets={() => setIsGoogleSheetsModalOpen(true)}
+            onFastBatchGenerate={handleFastBatchGenerate}
             language={language}
           />
         )}
@@ -744,6 +788,7 @@ export default function App() {
           <AgentControlCenter
             account={activeAccount}
             onUpdateSchedule={handleUpdateSchedule}
+            onFastBatchGenerate={handleFastBatchGenerate}
             language={language}
           />
         )}
@@ -1002,6 +1047,13 @@ export default function App() {
           setActiveAccount(updated);
           setAccounts(storageService.getAccounts());
         }}
+        language={language}
+      />
+
+      <GoogleSheetsModal
+        isOpen={isGoogleSheetsModalOpen}
+        onClose={() => setIsGoogleSheetsModalOpen(false)}
+        backlinks={activeAccount.backlinks}
         language={language}
       />
 

@@ -16,11 +16,16 @@ import {
   ExternalLink,
   CheckCircle2,
   FileText,
-  Globe
+  Globe,
+  FileSpreadsheet,
+  Zap,
+  Users,
+  Search
 } from 'lucide-react';
 import { Backlink, AgentSchedule, UserAccount, WordPressSite } from '../types';
 import { Language, translations } from '../utils/translations';
 import { RealtimeDomainKeywordSubmitBar } from './RealtimeDomainKeywordSubmitBar';
+import { HUMAN_EDITORIAL_PERSONAS } from '../data/mockInitialData';
 
 interface DashboardOverviewProps {
   account: UserAccount;
@@ -33,6 +38,8 @@ interface DashboardOverviewProps {
   onOpenAuditReport?: () => void;
   onOpenCampaignModal?: () => void;
   onInspectBacklink?: (backlink: Backlink) => void;
+  onOpenGoogleSheets?: () => void;
+  onFastBatchGenerate?: (count: number) => void;
   language: Language;
 }
 
@@ -47,6 +54,8 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
   onOpenAuditReport,
   onOpenCampaignModal,
   onInspectBacklink,
+  onOpenGoogleSheets,
+  onFastBatchGenerate,
   language
 }) => {
   const t = translations[language];
@@ -88,6 +97,14 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
   }, {} as Record<string, number>);
 
   const activeCamp = account.activeAutonomousCampaign;
+
+  const targetSiteDomain = selectedSite?.url?.replace(/^https?:\/\//, '') || 
+    (account.sites[0]?.url ? account.sites[0].url.replace(/^https?:\/\//, '') : 'fitnesstoday.us');
+
+  const personaLinkCounts = HUMAN_EDITORIAL_PERSONAS.map(p => ({
+    ...p,
+    count: filteredBacklinks.filter(b => b.humanPersona?.id === p.id || b.humanPersona?.name === p.name).length
+  }));
 
   return (
     <div className="space-y-6">
@@ -258,6 +275,220 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
 
       </div>
 
+      {/* MILLIONS OF TRAFFIC & FAST MULTI-LINK GENERATOR */}
+      <div className="p-6 bg-gradient-to-r from-emerald-950/50 via-slate-900 to-indigo-950/60 border border-emerald-500/30 rounded-3xl shadow-2xl relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
+
+        <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 relative z-10">
+          
+          <div className="max-w-2xl space-y-2">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="px-3 py-1 rounded-full text-xs font-black bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 flex items-center space-x-1.5 shadow-sm">
+                <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+                <span>{language === 'hi' ? `🎯 लक्ष्य: ${targetSiteDomain} पर मिलियंस ऑफ ट्रैफिक` : `🎯 Target: Millions of Traffic on ${targetSiteDomain}`}</span>
+              </span>
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                55+ High-Traffic Publishers (9.8B+ Reach)
+              </span>
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                0% Spam • 100% DoFollow
+              </span>
+            </div>
+
+            <h3 className="text-xl sm:text-2xl font-black text-white tracking-tight">
+              {language === 'hi' 
+                ? 'हाई-ट्रैफिक वेबसाइट्स से त्वरित बैकलिंक निर्माण (Fast Multi-Backlink Generator)' 
+                : 'High-Velocity Multi-Backlink Generator for Massive Referral Traffic'}
+            </h3>
+
+            <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
+              {language === 'hi'
+                ? 'Healthline (260M+), WebMD (210M+), Reddit (1.8B+), Men\'s Health (48M+), Livestrong (42M+) और BarBend जैसी शीर्ष गैर-स्पैम वेबसाइट्स पर एक साथ तेजी से डू-फॉलो बैकलिंक्स बनाएं और लाखों का ऑर्गेनिक व रेफरल ट्रैफिक प्राप्त करें।'
+                : 'Instantly build high-tier contextual backlinks across Healthline, WebMD, Reddit, Men\'s Health, and Livestrong to drive millions of organic and referral visitors to your target articles.'}
+            </p>
+
+            <div className="pt-1 flex flex-wrap items-center gap-4 text-xs">
+              <div className="flex items-center space-x-1.5 text-slate-300">
+                <Globe className="w-4 h-4 text-emerald-400" />
+                <span>लक्षित डोमेन: <strong className="text-emerald-400 font-mono">{targetSiteDomain}</strong></span>
+              </div>
+              <div className="flex items-center space-x-1.5 text-slate-300">
+                <TrendingUp className="w-4 h-4 text-amber-400" />
+                <span>अनुमानित रेफरल ट्रैफिक: <strong className="text-amber-300">{totalTraffic.toLocaleString()}+ मासिक पाठक</strong></span>
+              </div>
+            </div>
+          </div>
+
+          {/* Quick Fast Action Trigger Controls */}
+          <div className="w-full lg:w-auto shrink-0 flex flex-col gap-2.5 p-4 bg-slate-950/80 border border-slate-800 rounded-2xl min-w-[280px]">
+            <span className="text-[11px] font-extrabold text-amber-400 uppercase tracking-wider flex items-center space-x-1">
+              <Zap className="w-3.5 h-3.5 fill-current" />
+              <span>{language === 'hi' ? '⚡ 1-क्लिक फास्ट बैकलिंक बनाएं' : '⚡ 1-Click Fast Blast'}</span>
+            </span>
+
+            <div className="grid grid-cols-2 gap-2">
+              {[5, 10, 25, 50].map((count) => (
+                <button
+                  key={count}
+                  type="button"
+                  onClick={() => onFastBatchGenerate ? onFastBatchGenerate(count) : onTriggerAgent()}
+                  disabled={isTriggering}
+                  className="px-3 py-2 bg-gradient-to-r from-amber-500 to-emerald-500 hover:from-amber-400 hover:to-emerald-400 text-slate-950 font-black text-xs rounded-xl transition shadow-md flex items-center justify-center space-x-1 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <Zap className="w-3.5 h-3.5 fill-current" />
+                  <span>{count} {language === 'hi' ? 'फास्ट लिंक्स' : 'Links'}</span>
+                </button>
+              ))}
+            </div>
+
+            <div className="pt-2 border-t border-slate-800/80 flex items-center justify-between gap-2">
+              <button
+                type="button"
+                onClick={onOpenTargetsModal}
+                className="text-[11px] text-indigo-400 hover:text-indigo-300 font-bold transition flex items-center space-x-1"
+              >
+                <span>{language === 'hi' ? '📚 55+ अथॉरिटी साइट्स देखें' : '📚 View 55+ Targets'}</span>
+              </button>
+
+              {onOpenGoogleSheets && (
+                <button
+                  type="button"
+                  onClick={onOpenGoogleSheets}
+                  className="text-[11px] text-emerald-400 hover:text-emerald-300 font-bold transition flex items-center space-x-1"
+                >
+                  <FileSpreadsheet className="w-3.5 h-3.5" />
+                  <span>{language === 'hi' ? 'गूगल शीट्स' : 'Sheets'}</span>
+                </button>
+              )}
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      {/* MULTI-HUMAN EDITORIAL PERSONA OUTREACH TEAM (GOOGLE SEARCH ESSENTIALS COMPLIANT) */}
+      <div className="bg-slate-900/60 border border-slate-800 rounded-3xl p-6 space-y-5 shadow-xl relative overflow-hidden">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-800">
+          <div>
+            <div className="flex items-center space-x-2 flex-wrap gap-y-1">
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-indigo-500 to-emerald-500 text-white flex items-center justify-center shrink-0 shadow">
+                <Users className="w-4 h-4" />
+              </div>
+              <h3 className="text-base sm:text-lg font-black text-white">
+                {language === 'hi' 
+                  ? 'मल्टी-ह्यूमन संपादकीय लेखक टीम (Google Search Essentials & SpamBrain Compliant)' 
+                  : 'Multi-Human Editorial Outreach Team (Google Search Essentials Compliant)'}
+              </h3>
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
+                0% Bot Footprint
+              </span>
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-indigo-500/15 text-indigo-300 border border-indigo-500/30">
+                Distributed E-E-A-T
+              </span>
+            </div>
+            <p className="text-xs text-slate-300 mt-1 max-w-3xl leading-relaxed">
+              {language === 'hi'
+                ? `Google की नीतियों के पूर्ण अनुपालन के लिए, आपके बैकलिंक्स किसी एक बॉट की तरह नहीं, बल्कि 6 अलग-अलग प्रमाणित मानव विशेषज्ञों की कलम से बनाए जाते हैं। प्रत्येक लेखक की अपनी अनूठी भाषा शैली, समय-अंतराल और शोध पद्धति है — जिससे ${targetSiteDomain} को अधिकतम ऑर्गेनिक अथॉरिटी मिलती है।`
+                : `To strictly adhere to Google Search Essentials and SpamBrain guidelines, backlinks are distributed across 6 distinct verified clinical and athletic researchers. Varied writing styles, randomized cadence, and diverse anchor distributions prevent footprints while driving authority to ${targetSiteDomain}.`}
+            </p>
+          </div>
+
+          <div className="flex items-center space-x-2 shrink-0">
+            {onFastBatchGenerate && (
+              <button
+                type="button"
+                onClick={() => onFastBatchGenerate(10)}
+                disabled={isTriggering}
+                className="px-3.5 py-2 bg-gradient-to-r from-amber-500 to-emerald-500 hover:from-amber-400 hover:to-emerald-400 text-slate-950 font-black text-xs rounded-xl transition shadow flex items-center space-x-1.5 active:scale-95 disabled:opacity-50"
+              >
+                <Zap className="w-3.5 h-3.5 fill-current" />
+                <span>{language === 'hi' ? '⚡ +10 मल्टी-ह्यूमन लिंक्स' : '⚡ +10 Distributed Links'}</span>
+              </button>
+            )}
+
+            <button
+              type="button"
+              onClick={onOpenTargetsModal}
+              className="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs rounded-xl transition flex items-center space-x-1.5 border border-slate-700"
+            >
+              <Search className="w-3.5 h-3.5 text-cyan-400" />
+              <span>{language === 'hi' ? '🔍 दैनिक रिसर्च टारगेट्स' : '🔍 Daily Target Research'}</span>
+            </button>
+          </div>
+        </div>
+
+        {/* 6 Human Personas Cards Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
+          {personaLinkCounts.map((p) => (
+            <div
+              key={p.id}
+              className="p-4 bg-slate-950/80 border border-slate-800/80 hover:border-emerald-500/40 rounded-2xl transition space-y-2 relative group"
+            >
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex items-center space-x-3 min-w-0">
+                  <div className={`w-10 h-10 rounded-2xl bg-gradient-to-tr ${p.avatarColor} text-white font-black text-xs flex items-center justify-center shrink-0 shadow-md`}>
+                    {p.name.split(' ').map(n => n[0]).slice(0, 2).join('')}
+                  </div>
+                  <div className="min-w-0">
+                    <h4 className="text-xs font-bold text-white truncate" title={p.name}>
+                      {p.name}
+                    </h4>
+                    <span className="text-[10px] text-emerald-400 font-semibold block truncate">
+                      {p.credentials}
+                    </span>
+                  </div>
+                </div>
+
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 shrink-0">
+                  {p.count} {language === 'hi' ? 'लिंक्स' : 'Links'}
+                </span>
+              </div>
+
+              <div className="pt-1">
+                <span className="text-[10px] uppercase font-bold text-slate-500 block tracking-wider">
+                  {language === 'hi' ? 'विशेषज्ञता व डोमेन' : 'Specialization Focus'}
+                </span>
+                <span className="text-xs font-medium text-slate-200 block truncate mt-0.5">
+                  {p.specialization}
+                </span>
+              </div>
+
+              <p className="text-[11px] text-slate-400 line-clamp-2 leading-relaxed">
+                {p.bio}
+              </p>
+
+              <div className="pt-2 border-t border-slate-800/60 flex items-center justify-between text-[10px]">
+                <span className="text-emerald-400 font-semibold flex items-center space-x-1">
+                  <ShieldCheck className="w-3 h-3 inline" />
+                  <span>Google Safe</span>
+                </span>
+                <span className="text-slate-400 truncate max-w-[140px] text-right font-mono">
+                  &rarr; {targetSiteDomain}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Distributed Natural Pacing Guarantee Note */}
+        <div className="p-3.5 bg-emerald-950/20 border border-emerald-500/20 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+          <div className="flex items-center space-x-2.5">
+            <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
+            <span className="text-slate-300 leading-relaxed">
+              {language === 'hi'
+                ? `प्रतिदिन नया शोध: AI इंजन प्रतिदिन 10+ नए उच्च-ट्रैफिक प्रकाशकों को खोजकर इन 6 मानव विशेषज्ञों के माध्यम से ${targetSiteDomain} के लिए बैकलिंक्स उत्पन्न करता है।`
+                : `Continuous Daily Discovery: The engine automatically researches fresh high-traffic publishers daily and assigns them across these 6 human personas for natural link profile growth on ${targetSiteDomain}.`}
+            </span>
+          </div>
+
+          <div className="flex items-center space-x-2 shrink-0">
+            <span className="text-[10px] font-bold text-emerald-400 px-2 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/20 whitespace-nowrap">
+              0% Algorithmic Penalty Risk
+            </span>
+          </div>
+        </div>
+      </div>
+
       {/* Hero: "Human-Like Organic Drip Engine" Card */}
       <div className="p-6 bg-gradient-to-br from-slate-900 via-slate-900/90 to-indigo-950/40 border border-slate-800 rounded-2xl shadow-xl relative overflow-hidden">
         <div className="absolute -right-8 -bottom-8 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
@@ -369,16 +600,39 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             </p>
           </div>
 
-          <div className="flex items-center space-x-2 shrink-0">
+          <div className="flex flex-wrap items-center gap-2 shrink-0">
+            {onFastBatchGenerate && (
+              <button
+                onClick={() => onFastBatchGenerate(5)}
+                className="px-3 py-1.5 bg-gradient-to-r from-amber-500 to-emerald-500 hover:from-amber-400 hover:to-emerald-400 text-slate-950 font-black text-xs rounded-xl transition shadow flex items-center space-x-1"
+                title="Immediately build 5 high-authority backlinks in parallel"
+              >
+                <Zap className="w-3.5 h-3.5 fill-current" />
+                <span>{language === 'hi' ? '⚡ 5x फास्ट लिंक्स बनाएं' : '⚡ 5x Fast Links'}</span>
+              </button>
+            )}
+
+            {onOpenGoogleSheets && (
+              <button
+                onClick={onOpenGoogleSheets}
+                className="px-3 py-1.5 bg-emerald-950/60 hover:bg-emerald-900/70 text-emerald-300 font-bold text-xs rounded-xl transition flex items-center space-x-1.5 border border-emerald-500/40 shadow-sm"
+                title="Export all backlinks to Google Sheets"
+              >
+                <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-400" />
+                <span>{language === 'hi' ? 'गूगल शीट्स' : 'Google Sheets'}</span>
+              </button>
+            )}
+
             {onOpenCampaignModal && (
               <button
                 onClick={onOpenCampaignModal}
-                className="px-3 py-1.5 bg-gradient-to-r from-amber-500 to-indigo-600 hover:from-amber-400 hover:to-indigo-500 text-slate-950 font-bold text-xs rounded-xl transition shadow flex items-center space-x-1"
+                className="px-3 py-1.5 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-bold text-xs rounded-xl transition shadow flex items-center space-x-1"
               >
-                <Sparkles className="w-3.5 h-3.5 fill-current" />
-                <span>{language === 'hi' ? '🚀 नया कैंपेन शुरू करें' : '🚀 Launch Campaign'}</span>
+                <Sparkles className="w-3.5 h-3.5 fill-current text-amber-300" />
+                <span>{language === 'hi' ? '🚀 नया कैंपेन' : '🚀 Launch Campaign'}</span>
               </button>
             )}
+
             {onOpenAuditReport && (
               <button
                 onClick={onOpenAuditReport}

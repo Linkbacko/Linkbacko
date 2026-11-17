@@ -141,6 +141,21 @@ export interface HighAuthorityTarget {
   acceptableOpportunityTypes: OpportunityType[];
   ecosystemSurface: 'Traditional Search' | 'AI Answer Engine' | 'Knowledge Graph' | 'Research Repository' | 'Industry Publication';
   isEasyBuild?: boolean;
+  isNewlyDiscovered?: boolean;
+  discoveredDate?: string;
+  researchSummary?: string;
+}
+
+export interface HumanEditorialPersona {
+  id?: string;
+  name: string;
+  role?: string;
+  credentials?: string;
+  specialization?: string;
+  outreachStyle?: string;
+  avatarColor?: string;
+  complianceRating?: string;
+  bio?: string;
 }
 
 export interface OutreachQualityScore {
@@ -194,11 +209,14 @@ export interface Backlink {
   aiSearchVisibility?: 'Attributed in AI Overviews' | 'Direct Citation' | 'Graph Connected' | 'Crawled';
   sourceArticleTitle?: string;
   sourceArticleUrl?: string;
+  humanPersona?: HumanEditorialPersona;
+  discoverySource?: 'Automated Daily Deep Research' | 'Curated Knowledge Base' | 'Algorithmic Platform Scan';
+  isNewlyDiscovered?: boolean;
 }
 
 export interface AgentSchedule {
   autonomousMode: boolean;
-  dripPacing: 'conservative' | 'natural' | 'accelerated';
+  dripPacing: 'conservative' | 'natural' | 'accelerated' | 'turbo';
   minDelayHours: number;
   maxDelayHours: number;
   nextExecutionTime: string;
@@ -352,3 +370,42 @@ export interface UserAccount {
   authorityGraph?: AuthorityGraphNode[];
   activeAutonomousCampaign?: AutonomousCampaignSession;
 }
+
+export interface SerpRankRecord {
+  id: string;
+  keyword: string;
+  currentPosition: number;
+  previousPosition: number;
+  change: number;
+  searchVolume: number;
+  rankingUrl: string;
+  featuredSnippet: boolean;
+  aiOverviewCited: boolean;
+  topCompetitor: string;
+  intent: 'Informational' | 'Transactional' | 'Commercial';
+  lastChecked: string;
+}
+
+export interface IndexingPingLog {
+  id: string;
+  url: string;
+  targetDomain: string;
+  engine: 'Googlebot Direct API' | 'IndexNow (Bing/Yandex)' | 'Cloudflare Crawl Hint';
+  status: 'SUCCESS' | 'QUEUED' | 'CRAWLED';
+  statusCode: number;
+  latencyMs: number;
+  timestamp: string;
+  botIp: string;
+}
+
+export interface InformationGainAsset {
+  id: string;
+  title: string;
+  type: 'Proprietary Clinical Dataset' | 'Athletic Benchmark' | 'Physiology Calculator' | 'Meta-Analysis Review';
+  studySize: string;
+  keyFinding: string;
+  citationScore: number; // 0-100
+  aiOverviewReady: boolean;
+  targetKeywords: string[];
+}
+

@@ -1,5 +1,6 @@
 import { UserAccount, WordPressSite, Backlink, AgentLog, AgentSchedule, BacklinkCampaign, AutonomousCampaignSession } from '../types';
-import { INITIAL_USER_ACCOUNT } from '../data/mockInitialData';
+import { INITIAL_USER_ACCOUNT, HUMAN_EDITORIAL_PERSONAS } from '../data/mockInitialData';
+import { aiAgentEngine } from './aiAgentEngine';
 
 const ACCOUNTS_STORAGE_KEY = 'linkpulse_accounts_v1';
 const ACTIVE_ACCOUNT_ID_KEY = 'linkpulse_active_account_id_v1';
@@ -16,31 +17,52 @@ export const storageService = {
       const parsed: UserAccount[] = JSON.parse(data);
       let needsResave = false;
       parsed.forEach(acc => {
-        // Enforce strictly one domain: fitnesstoday.us
+        // Enforce the one and only verified website: fitnesstoday.us
         acc.sites = INITIAL_USER_ACCOUNT.sites;
         acc.linkableAssets = INITIAL_USER_ACCOUNT.linkableAssets;
         needsResave = true;
 
         if (acc.activeAutonomousCampaign) {
           acc.activeAutonomousCampaign.domain = 'https://fitnesstoday.us';
-          acc.activeAutonomousCampaign.siteName = 'Fitness Today US';
+          acc.activeAutonomousCampaign.siteName = 'fitnesstoday.us';
           needsResave = true;
         }
 
-        // Ensure all backlinks belong to fitnesstoday.us
-        if (!acc.backlinks || acc.backlinks.length === 0 || acc.backlinks.some(b => b.destinationUrl?.includes('techtrendsglobal') || b.destinationUrl?.includes('fitnessstreet'))) {
+        // Ensure all backlinks belong exclusively to fitnesstoday.us
+        if (!acc.backlinks || acc.backlinks.length === 0 || acc.backlinks.some(b => b.destinationUrl?.includes('techtrendsglobal') || b.destinationUrl?.includes('fitnessstreet') || b.destinationUrl?.includes('fitnessguru'))) {
           acc.backlinks = INITIAL_USER_ACCOUNT.backlinks;
           needsResave = true;
         } else {
-          acc.backlinks.forEach(bl => {
-            // Fix destination URL if not fitnesstoday.us
+          acc.backlinks.forEach((bl, idx) => {
+            // Fix destination URL to fitnesstoday.us
             if (!bl.destinationUrl || !bl.destinationUrl.includes('fitnesstoday.us')) {
               bl.destinationUrl = 'https://fitnesstoday.us/articles/muscle-recovery-hypertrophy-guide';
-              bl.siteId = 'site-wp-fitness';
+              bl.sourceArticleUrl = 'https://fitnesstoday.us/articles/muscle-recovery-hypertrophy-guide';
+              bl.siteId = 'site-wp-fitness-today';
               needsResave = true;
             }
 
-            if (!bl.targetUrl || bl.targetUrl.includes('-research-') || bl.targetUrl.includes('/publications/')) {
+            if (bl.siteId !== 'site-wp-fitness-today') {
+              bl.siteId = 'site-wp-fitness-today';
+              needsResave = true;
+            }
+
+            // Assign human persona if missing
+            if (!bl.humanPersona) {
+              const p = HUMAN_EDITORIAL_PERSONAS[idx % HUMAN_EDITORIAL_PERSONAS.length];
+              bl.humanPersona = {
+                name: p.name,
+                role: p.specialization,
+                avatarColor: p.avatarColor
+              };
+              bl.discoverySource = 'Automated Daily Deep Research';
+              needsResave = true;
+            }
+
+            if (bl.targetDomain?.includes('telegra.ph') && (!bl.targetUrl || bl.targetUrl === 'https://telegra.ph/')) {
+              bl.targetUrl = 'https://telegra.ph/Clinical-Muscle-Recovery-Protocols---fitnesstodayus-10-21';
+              needsResave = true;
+            } else if (!bl.targetUrl || bl.targetUrl.includes('-research-') || bl.targetUrl.includes('/publications/')) {
               bl.targetUrl = aiAgentEngine.resolveRealTargetUrl(bl.targetDomain, bl.anchorText, 'Fitness & Health');
               bl.httpStatus = 200;
               needsResave = true;

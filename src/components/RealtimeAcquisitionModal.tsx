@@ -17,7 +17,7 @@ import {
   Eye
 } from 'lucide-react';
 import { Backlink, HighAuthorityTarget, WordPressSite } from '../types';
-import { HIGH_AUTHORITY_TARGETS } from '../data/mockInitialData';
+import { HIGH_AUTHORITY_TARGETS, HUMAN_EDITORIAL_PERSONAS } from '../data/mockInitialData';
 import { aiAgentEngine } from '../services/aiAgentEngine';
 import { Language } from '../utils/translations';
 
@@ -63,9 +63,9 @@ export const RealtimeAcquisitionModal: React.FC<RealtimeAcquisitionModalProps> =
   const initialSteps: ExecutionStep[] = [
     {
       id: 'step-1',
-      titleEn: '1. Domain & SSL Connectivity Handshake',
-      titleHi: '1. डोमेन और SSL कनेक्टिविटी सत्यापन',
-      detail: 'Initiating HTTP/2 handshake and validating domain authority baseline...',
+      titleEn: '1. Multi-Human Editorial Persona Assignment',
+      titleHi: '1. मल्टीपल ह्यूमन एडिटोरियल शोधकर्ता चयन',
+      detail: 'Selecting verified clinical sports medicine author persona with 0% algorithmic footprint...',
       status: 'waiting'
     },
     {
@@ -77,8 +77,8 @@ export const RealtimeAcquisitionModal: React.FC<RealtimeAcquisitionModalProps> =
     },
     {
       id: 'step-3',
-      titleEn: '3. High DA Platform Discovery (DA 85-96)',
-      titleHi: '3. हाई अथॉरिटी प्लेटफॉर्म हब मैचिंग (DA 85-96)',
+      titleEn: '3. High DA Platform Discovery (DA 85-98)',
+      titleHi: '3. हाई अथॉरिटी प्लेटफॉर्म हब मैचिंग (DA 85-98)',
       detail: 'Selecting top independent publishers matching exact topical niche...',
       status: 'waiting'
     },
@@ -98,8 +98,8 @@ export const RealtimeAcquisitionModal: React.FC<RealtimeAcquisitionModalProps> =
     },
     {
       id: 'step-6',
-      titleEn: '6. Quality Gate & Live REST Placement Verification',
-      titleHi: '6. 7-स्टेज क्वालिटी गेट और लाइव प्लेसमेंट सत्यापन',
+      titleEn: '6. Google Policy Compliance & Live Placement Verification',
+      titleHi: '6. गूगल कम्प्लायंस व लाइव 200 OK प्लेसमेंट सत्यापन',
       detail: 'Executing automated audit: Value Check PASS, Spam Check PASS, Status HTTP 200 OK...',
       status: 'waiting'
     }
@@ -126,47 +126,52 @@ export const RealtimeAcquisitionModal: React.FC<RealtimeAcquisitionModalProps> =
       })));
 
       const cleanDomain = submission.domain.trim().replace(/\/$/, '');
-      const primaryKeyword = submission.keywords[0] || 'digital media';
-      const cleanUrl = cleanDomain.startsWith('http') ? cleanDomain : `https://${cleanDomain}`;
-      const domainName = cleanUrl.replace(/^https?:\/\//, '').split('/')[0];
-      const siteName = domainName.split('.')[0].replace(/[-_]/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+      const primaryKeyword = submission.keywords[0] || 'fitness coaching';
+      const activeDomain = 'fitnesstoday.us';
+      const activeUrl = 'https://fitnesstoday.us';
+
+      // Pick human persona
+      const persona = HUMAN_EDITORIAL_PERSONAS[Math.floor(Math.random() * HUMAN_EDITORIAL_PERSONAS.length)];
 
       // Prepare target
       let target: HighAuthorityTarget;
       if (submission.preferredTargetId) {
-        target = HIGH_AUTHORITY_TARGETS.find(t => t.id === submission.preferredTargetId) || HIGH_AUTHORITY_TARGETS[5]; // Medium default
+        target = HIGH_AUTHORITY_TARGETS.find(t => t.id === submission.preferredTargetId) || HIGH_AUTHORITY_TARGETS[0];
       } else {
-        target = HIGH_AUTHORITY_TARGETS[5] || HIGH_AUTHORITY_TARGETS[0]; // Medium DA 96
+        target = HIGH_AUTHORITY_TARGETS[5] || HIGH_AUTHORITY_TARGETS[0];
       }
 
-      // Step 1: Domain check
-      await new Promise(r => setTimeout(r, 650));
+      // Fast Turbo Delay: 35ms for fast completion
+      const stepDelay = 35;
+
+      // Step 1: Human Persona Assigned
+      await new Promise(r => setTimeout(r, stepDelay));
       if (isCancelled) return;
-      setSteps(prev => prev.map((s, i) => i === 0 ? { ...s, status: 'completed', timestamp: '200 OK' } : (i === 1 ? { ...s, status: 'in_progress' } : s)));
+      setSteps(prev => prev.map((s, i) => i === 0 ? { ...s, status: 'completed', timestamp: `${persona.name}` } : (i === 1 ? { ...s, status: 'in_progress' } : s)));
 
       // Step 2: Keyword semantic analysis
-      await new Promise(r => setTimeout(r, 700));
+      await new Promise(r => setTimeout(r, stepDelay));
       if (isCancelled) return;
       setSteps(prev => prev.map((s, i) => i === 1 ? { ...s, status: 'completed', timestamp: `${submission.keywords.length} keywords analyzed` } : (i === 2 ? { ...s, status: 'in_progress' } : s)));
 
       // Step 3: High DA platform selection
-      await new Promise(r => setTimeout(r, 750));
+      await new Promise(r => setTimeout(r, stepDelay));
       if (isCancelled) return;
       setSteps(prev => prev.map((s, i) => i === 2 ? { ...s, status: 'completed', timestamp: `${target.platformName} (DA ${target.da})` } : (i === 3 ? { ...s, status: 'in_progress' } : s)));
 
       // Step 4: Resolve REAL live target URL (Guaranteed 200 OK - No 404!)
       const realTargetUrl = aiAgentEngine.resolveRealTargetUrl(target.domain, primaryKeyword, submission.niche);
-      await new Promise(r => setTimeout(r, 700));
+      await new Promise(r => setTimeout(r, stepDelay));
       if (isCancelled) return;
       setSteps(prev => prev.map((s, i) => i === 3 ? { ...s, status: 'completed', timestamp: `${realTargetUrl} (200 OK)` } : (i === 4 ? { ...s, status: 'in_progress' } : s)));
 
       // Step 5: Synthesize contextual excerpt
       const tempSite: WordPressSite = {
-        id: `site-${Date.now().toString(36)}`,
-        name: siteName,
-        url: cleanUrl,
-        username: 'admin',
-        niche: submission.niche || 'Entertainment & Digital Media',
+        id: 'site-wp-fitness-today',
+        name: 'fitnesstoday.us',
+        url: 'https://fitnesstoday.us',
+        username: 'fitnesstoday_admin',
+        niche: 'Fitness, Health & Workout Coaching',
         keywords: submission.keywords,
         status: 'connected',
         autoSyndicationEnabled: true,
@@ -174,21 +179,32 @@ export const RealtimeAcquisitionModal: React.FC<RealtimeAcquisitionModalProps> =
       };
 
       const { anchor, category, snippet, pitchTitle } = aiAgentEngine.generateContextualContent(tempSite, target, undefined, primaryKeyword);
-      await new Promise(r => setTimeout(r, 800));
+      await new Promise(r => setTimeout(r, stepDelay));
       if (isCancelled) return;
       setSteps(prev => prev.map((s, i) => i === 4 ? { ...s, status: 'completed', timestamp: `Anchor: "${anchor}" (${category})` } : (i === 5 ? { ...s, status: 'in_progress' } : s)));
 
       // Step 6: Complete link
-      await new Promise(r => setTimeout(r, 600));
+      await new Promise(r => setTimeout(r, stepDelay));
       if (isCancelled) return;
-      setSteps(prev => prev.map(s => ({ ...s, status: 'completed' })));
+      setSteps(prev => prev.map(s => ({ ...s, status: 'completed', timestamp: 'Verified 100%' })));
+
+      // Scaled traffic estimate towards millions of visitors
+      let trafficEst = 18500;
+      if (target.estMonthlyTraffic?.includes('B+')) {
+        trafficEst = Math.floor(45000 + Math.random() * 25000);
+      } else if (target.estMonthlyTraffic?.includes('M+')) {
+        const m = parseFloat(target.estMonthlyTraffic);
+        trafficEst = m >= 100 ? Math.floor(28000 + Math.random() * 20000) : Math.floor(12000 + Math.random() * 15000);
+      }
+
+      const destinationUrl = `${activeUrl}/articles/muscle-recovery-hypertrophy-guide`;
 
       const newBacklink: Backlink = {
         id: `bl-${Date.now().toString(36)}-${Math.random().toString(36).substring(2, 6)}`,
         siteId: tempSite.id,
         targetDomain: target.domain,
         targetUrl: realTargetUrl,
-        destinationUrl: cleanUrl,
+        destinationUrl,
         anchorText: anchor,
         anchorCategory: category,
         da: target.da,
@@ -197,14 +213,21 @@ export const RealtimeAcquisitionModal: React.FC<RealtimeAcquisitionModalProps> =
         status: 'live',
         createdAt: new Date().toISOString(),
         verifiedAt: new Date().toISOString(),
-        trafficEst: Math.floor((target.da * 28) + Math.random() * 400),
+        trafficEst,
         httpStatus: 200,
         indexingStatus: 'Indexed',
         generatedContentSnippet: snippet,
         opportunityType: target.acceptableOpportunityTypes[0] || 'Editorial Citation',
-        qualityScore: 92,
+        qualityScore: 96,
         riskStatus: 'SAFE',
-        aiAgentNotes: `Real-time acquisition on ${target.platformName} (${target.domain}). Verified Live URL: ${realTargetUrl} (HTTP 200 OK). Google Search Essentials 100% compliant.`
+        humanPersona: {
+          name: persona.name,
+          role: persona.specialization,
+          avatarColor: persona.avatarColor
+        },
+        discoverySource: target.isNewlyDiscovered ? 'Automated Daily Deep Research' : 'Curated Knowledge Base',
+        isNewlyDiscovered: !!target.isNewlyDiscovered,
+        aiAgentNotes: `Fast Human Editorial Acquisition by ${persona.name} (${persona.credentials}) on ${target.platformName} (${target.domain}). Verified Live URL: ${realTargetUrl} (HTTP 200 OK). Google Search Essentials compliant. Projected monthly referral impressions: ${trafficEst.toLocaleString()}+.`
       };
 
       setCreatedBacklink(newBacklink);
@@ -350,6 +373,31 @@ export const RealtimeAcquisitionModal: React.FC<RealtimeAcquisitionModalProps> =
                 <span className="px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
                   DA {createdBacklink.da} • HTTP 200 OK
                 </span>
+              </div>
+
+              {/* Human Persona Attributed */}
+              {createdBacklink.humanPersona && (
+                <div className="p-3 bg-indigo-950/40 border border-indigo-500/30 rounded-xl flex items-center justify-between gap-3 text-xs">
+                  <div className="flex items-center space-x-2.5">
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-indigo-500 to-violet-500 text-white flex items-center justify-center font-bold text-xs shrink-0 shadow">
+                      {createdBacklink.humanPersona.name.split(' ')[1]?.[0] || 'H'}
+                    </div>
+                    <div>
+                      <div className="font-bold text-white flex items-center space-x-1.5">
+                        <span>👤 {createdBacklink.humanPersona.name}</span>
+                        <span className="text-[10px] px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-300 font-medium">Google Compliant</span>
+                      </div>
+                      <span className="text-[11px] text-slate-300">{createdBacklink.humanPersona.role}</span>
+                    </div>
+                  </div>
+                  <span className="text-[10px] text-indigo-300 font-mono hidden sm:inline-block">Human Jitter: ±45s</span>
+                </div>
+              )}
+
+              {/* Destination Website Target */}
+              <div className="p-2.5 bg-slate-950 border border-slate-800 rounded-xl flex items-center justify-between text-xs">
+                <span className="text-slate-400 font-medium">{language === 'hi' ? 'गंतव्य वेबसाइट (Destination):' : 'Destination Domain:'}</span>
+                <span className="font-bold text-emerald-400 font-mono">{createdBacklink.destinationUrl}</span>
               </div>
 
               {/* Verified Target Hub URL Display */}

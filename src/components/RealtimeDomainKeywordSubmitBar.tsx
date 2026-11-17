@@ -31,14 +31,14 @@ const DOMAIN_PRESETS: DomainPreset[] = [
     domain: 'https://fitnesstoday.us',
     niche: 'Fitness, Health & Workout Coaching',
     keywords: [
-      'muscle recovery',
-      'daily workout routines',
+      'muscle recovery protocols',
       'clean intermittent fasting',
-      'zone 2 cardio',
-      'spine mobility routine',
-      'strength training'
+      'zone 2 cardio longevity',
+      'lower back pain mobility routine',
+      'pre workout hydration electrolytes',
+      'calisthenics progressive overload'
     ],
-    description: 'Premier health, daily workout regimes & clinical nutrition coaching (Sole Verified Active Domain)'
+    description: 'Premier health, daily workout regimes & clinical nutrition coaching'
   }
 ];
 
@@ -62,9 +62,8 @@ export const RealtimeDomainKeywordSubmitBar: React.FC<RealtimeDomainKeywordSubmi
   onOpenCampaignModal,
   language
 }) => {
-  // Always default to fitnesstoday.us as instructed, or currentSite if it is set
-  const defaultPreset = DOMAIN_PRESETS[0]; // Fitness Today US
-  const initialDomain = currentSite?.url || defaultPreset.domain;
+  const defaultPreset = DOMAIN_PRESETS[0];
+  const initialDomain = (currentSite?.url || defaultPreset.domain).replace(/\.+$/, '');
   const initialKeywords = currentSite?.keywords?.length 
     ? currentSite.keywords.join(', ') 
     : defaultPreset.keywords.join(', ');
@@ -82,7 +81,7 @@ export const RealtimeDomainKeywordSubmitBar: React.FC<RealtimeDomainKeywordSubmi
   // Sync if currentSite changes from outer switcher
   useEffect(() => {
     if (currentSite) {
-      setDomain(currentSite.url);
+      setDomain(currentSite.url.replace(/\.+$/, ''));
       setKeywordsInput(currentSite.keywords.join(', '));
       setNiche(currentSite.niche);
       setSelectedPresetName(currentSite.name);
@@ -111,7 +110,8 @@ export const RealtimeDomainKeywordSubmitBar: React.FC<RealtimeDomainKeywordSubmi
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!domain.trim()) {
+    const cleanDomain = domain.trim().replace(/\.+$/, '');
+    if (!cleanDomain) {
       setErrorMsg(language === 'hi' ? 'कृपया अपना वेबसाइट डोमेन दर्ज करें!' : 'Please enter your website domain!');
       return;
     }
@@ -128,7 +128,7 @@ export const RealtimeDomainKeywordSubmitBar: React.FC<RealtimeDomainKeywordSubmi
 
     setErrorMsg('');
     onStartRealtime({
-      domain: 'https://fitnesstoday.us',
+      domain: cleanDomain,
       keywords: rawKeywords,
       niche: niche || 'Fitness, Health & Workout Coaching',
       preferredTargetId: selectedTargetId || undefined
@@ -192,39 +192,6 @@ export const RealtimeDomainKeywordSubmitBar: React.FC<RealtimeDomainKeywordSubmi
         </div>
       </div>
 
-      {/* Single Verified Target Domain Banner: fitnesstoday.us */}
-      <div className="mt-4 pt-1 relative z-10">
-        <div className="p-3 bg-gradient-to-r from-emerald-950/40 via-indigo-950/30 to-slate-900 border border-emerald-500/30 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-inner">
-          <div className="flex items-center space-x-3">
-            <div className="w-9 h-9 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold shrink-0">
-              <Globe className="w-5 h-5" />
-            </div>
-            <div>
-              <div className="flex items-center space-x-2">
-                <span className="text-xs font-bold text-white uppercase tracking-wider">
-                  {language === 'hi' ? 'लक्षित एकमात्र डोमेन (Sole Target Domain):' : 'Sole Target Domain (Locked & Verified):'}
-                </span>
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                  fitnesstoday.us
-                </span>
-              </div>
-              <p className="text-[11px] text-emerald-300/80 mt-0.5">
-                {language === 'hi'
-                  ? 'सारे बैकलिंक सिर्फ fitnesstoday.us से बनेंगे — अन्य कोई डोमेन उपयोग नहीं होगा।'
-                  : 'All backlinks exclusively built for https://fitnesstoday.us • No external domains.'}
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-center space-x-2 shrink-0">
-            <span className="px-2.5 py-1 rounded-xl text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center space-x-1">
-              <CheckCircle2 className="w-3.5 h-3.5" />
-              <span>100% 200 OK Live</span>
-            </span>
-          </div>
-        </div>
-      </div>
-
       {/* Main Submission Form */}
       <form onSubmit={handleSubmit} className="mt-4 space-y-4 relative z-10">
         
@@ -241,15 +208,19 @@ export const RealtimeDomainKeywordSubmitBar: React.FC<RealtimeDomainKeywordSubmi
             <label className="text-xs font-bold text-slate-200 flex items-center justify-between">
               <span className="flex items-center space-x-1.5">
                 <Globe className="w-3.5 h-3.5 text-emerald-400" />
-                <span>{language === 'hi' ? 'वेबसाइट डोमेन (लॉक्ड):' : 'Target Domain (fitnesstoday.us):'}</span>
+                <span>{language === 'hi' ? 'वेबसाइट डोमेन URL:' : 'Target Domain URL:'}</span>
               </span>
-              <span className="text-[10px] text-emerald-400 font-mono">SSL 200 OK</span>
+              <span className="text-[10px] text-emerald-400 font-mono">200 OK</span>
             </label>
             <input
               type="text"
-              value="https://fitnesstoday.us"
-              readOnly
-              className="w-full px-3.5 py-2.5 bg-slate-950/90 border border-emerald-500/30 rounded-xl text-xs text-emerald-300 font-mono focus:outline-none cursor-default font-bold"
+              value={domain}
+              onChange={(e) => {
+                const val = e.target.value.replace(/\.+$/, '');
+                setDomain(val);
+              }}
+              placeholder="https://fitnesstoday.us"
+              className="w-full px-3.5 py-2.5 bg-slate-950/90 border border-slate-700 hover:border-slate-600 focus:border-emerald-500 rounded-xl text-xs text-emerald-300 font-mono focus:outline-none font-bold transition shadow-inner"
             />
           </div>
 
